@@ -2,7 +2,7 @@
   Name: Cody Gonsowski
   Date: 02/18/2020
   Assignment: Assignment #3
-  Program Title: Multithreaded Mutex & Synchorinzation
+  Program Title: Multithreaded Mutex & Synchronization
   Files required: main.c, makefile
   	
 --Design Overview--
