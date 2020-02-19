@@ -5,12 +5,10 @@
  */
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <pthread.h>
 
 //GLOBAL DECLARATION
 #define THREAD_COUNT 4 //number of threads to be run
-#define STARTING_BALANCE 100 //initial balance
 
 int balance = STARTING_BALANCE; //global balance for thread accessibility
 
@@ -41,9 +39,6 @@ int main(int argc, char* argv[]){
   for (int i = 0; i < THREAD_COUNT; i++){
     pthread_join(threads[i], NULL);
   }
-
-  printf("Original balance: %d", STARTING_BALANCE);
-  printf("New balance: %d", balance);
 }
 
 //FUNCTION IMPLEMENTATION
