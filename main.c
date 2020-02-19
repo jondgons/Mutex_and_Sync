@@ -5,16 +5,18 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <pthread.h>
 
 //GLOBAL DECLARATION
 #define THREAD_COUNT 4 //number of threads to be run
 
 int balance = 0; //global balance for thread accessibility
+int buffer = 0; //buffer between withdraw and deposit
 
 //mutex and signaling
 pthread_mutex_t mutex;
-pthread_cont_t condw, condd;
+pthread_cond_t condw, condd;
 
 //thread information
 typedef struct{
@@ -61,24 +63,28 @@ void* withdraw(void* tid){
   for (int i = 0; i < 10; i++){
     //entering mutex
     pthread_mutex_lock(&mutex);
-    while (balance == 0) {
+    while (buffer == 0) {
       pthread_cond_wait(&condw, &mutex);
     }
 
     //critical region
-    int readbalance = balance;
-    
-    printf("At time %d, the balance for withdrawal thread %p is %d", i, tid, balance);
-    readbalance -= 10;
-    
-    balance = readbalance;
-    printf("At time %d, the balance after withdrawal thread %p is %d", i, tid, balance);
+    buffer = 0;
+    if (balance >= 10){ //if balance is NOT 10 or higher, no withdraw will occur
+      int readbalance = balance;
 
+      printf("At time %d, the balance for withdrawal thread %p is %d\n", i, tid, balance);
+      readbalance -= 10;
+    
+      balance = readbalance;
+      printf("At time %d, the balance after withdrawal thread %p is %d\n\n", i, tid, balance);
+    }
+    
     //leaving mutex
-    pthread_cond_signal(&condp);
+    pthread_cond_signal(&condd);
     pthread_mutex_unlock(&mutex);
   }
 
+  pthread_exit(0);
   return 0;
 }
 
@@ -86,24 +92,26 @@ void* deposit(void* tid){
   for (int i = 0; i < 10; i++){
     //entering mutex
     pthread_mutex_lock(&mutex);
-    while (balance != 0) {
+    while (buffer != 0) {
       pthread_cond_wait(&condd, &mutex);
     }
 
     //critical region
+    buffer = 1;
     int readbalance = balance;
     
-    printf("At time %d, the balance before depositing thread %p is %d", i, tid, balance);
+    printf("At time %d, the balance before depositing thread %p is %d\n", i, tid, balance);
     readbalance += 11;
     
     balance = readbalance;
-    printf("At time %d, the balance after depositing thread %p is %d", i, tid, balance);
-
+    printf("At time %d, the balance after depositing thread %p is %d\n\n", i, tid, balance);
+    
     //leaving mutex
     pthread_cond_signal(&condw);
     pthread_mutex_unlock(&mutex);
   }
 
+  pthread_exit(0);
   return 0;
 }
 
